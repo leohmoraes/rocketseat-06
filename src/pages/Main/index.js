@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Keyboard } from 'react-native';
+import { Keyboard, ActivityIndicator } from 'react-native';
 import {
   Container,
   Form,
@@ -23,11 +23,13 @@ export default class Main extends Component {
   state = {
     newUser: '',
     users: [],
+    loading: false,
   };
 
   handleAddUser = async () => {
     // console.tron.log(this.state.newUser);
     const { users, newUser } = this.state; // users para poder adicionar na lista
+    this.setState({ loading: true }); // define como carregando e somente depois do retorno do await o status vai mudar
     const response = await api.get(`/users/${newUser}`);
     const data = {
       name: response.data.name, // nom do usuario
@@ -36,13 +38,13 @@ export default class Main extends Component {
       avatar: response.data.avatar_url, // imagem
     };
 
-    this.setState({ users: [...users, data], newUser: '' }); // atualiza o array e zera o newUser
+    this.setState({ users: [...users, data], newUser: '', loading: false }); // atualiza o array e zera o newUser
 
     Keyboard.dismiss();
   };
 
   render() {
-    const { users, newUser } = this.state;
+    const { users, newUser, loading } = this.state;
 
     return (
       <Container>
@@ -57,7 +59,11 @@ export default class Main extends Component {
             onSubmitEditing={this.handleAddUser}
           />
           <SubmitButton onPress={this.handleAddUser}>
-            <Icon name="add" size={20} color="#FFF" />
+            {loading ? (
+              <ActivityIndicator loading={loading} color="#FFF" />
+            ) : (
+              <Icon name="add" size={20} color="#FFF" />
+            )}
           </SubmitButton>
         </Form>
 
